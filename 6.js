@@ -1,23 +1,24 @@
 // Ланцюжок відповідальності (Chain of Responsibility) — це паттерн програмування, який дозволяє передавати запити послідовно через ланцюжок обробників, кожен з яких може обробити або передати запит далі.
-
 //AuthProcessor клас для обробки аутентифікації.
 class AuthProcessor {
   // setNextProcessor Метод, який приймає наступний обробник (processor) в ланцюгу.
   setNextProcessor(processor) {
     // Зберігає наступний обробник в поточному об'єкті.
-    this.processor = processor
+    this.nextProcessor = processor;
     // Повертає переданий обробник, щоб дозволити подальше ланцюжкове викликання.
-    return processor
+    return processor;
   }
+
   //validate Метод для перевірки аутентифікації. Приймає ім'я користувача (username) і пароль (passkey).
   validate(username, passkey) {
     // Перевіряє, чи є наступний обробник в ланцюгу.
     if (this.nextProcessor) {
       // Якщо так, передає запит на перевірку аутентифікації наступному обробнику,this.nextProcessor.validate(username, passkey), та повертаємо результат.
-      return this.nextProcessor.validate(username, passkey)
+      return this.nextProcessor.validate(username, passkey);
     } else {
       // Якщо наступного обробника немає, повертає false, сигналізуючи про невдалу аутентифікацію.
-      return false
+      console.log("Вхід заборонено")
+      return false;
     }
   }
 }
@@ -25,35 +26,40 @@ class AuthProcessor {
 // TwoStepProcessor Клас обробника, який перевіряє двофакторний код. Наслідує базовий клас AuthProcessor.
 class TwoStepProcessor extends AuthProcessor {
   // Метод для перевірки аутентифікації validate. Перевіряє ім'я користувача (username), пароль (passkey) і викликаємо метод isValidTwoStepCode().
-  isValidTwoStepCode() {
-    return true
-  }
   validate(username, passkey) {
     // Якщо username дорівнює "john", passkey дорівнює "password" та метод isValidTwoStepCode() повертає true, аутентифікація успішна.
-    if (username === 'john' && passkey === 'password' && isValidTwoStepCode() === true) {
+    if (
+      username === "john" &&
+      passkey === "password" &&
+      this.isValidTwoStepCode()
+    ) {
       // Виводить повідомлення про успішну аутентифікацію: Вхід дозволено з двофакторною аутентифікацією, і повертає true.
-      console.log("Вхід дозволено з двофакторною аутентифікацією")
-      return true
+      console.log("Вхід дозволено з двофакторною аутентифікацією");
+      return true;
     } else {
       // Якщо дані не вірні, запит на аутентифікацію передається наступному обробнику в ланцюгу, super.validate(username, passkey).
-      return super.validate(username, passkey)
+      return super.validate(username, passkey);
     }
-    // isValidTwoStepCode Метод для перевірки двофакторного коду,який повертає true.
+  }
+
+  // isValidTwoStepCode Метод для перевірки двофакторного коду,який повертає true.
+  isValidTwoStepCode() {
+    return true;
   }
 }
 
 // RoleProcessor Клас обробника, який перевіряє ролі користувача. Наслідує базовий клас AuthProcessor.
 class RoleProcessor extends AuthProcessor {
   // validate Метод для перевірки аутентифікації. Перевіряє роль користувача.
-  validate(username, passkey, user) {
+  validate(username, passkey) {
     // Якщо роль користувача - гість (guest), аутентифікація успішна.
-    if (user && user.role === 'guest') {
+    if (username === "guest") {
       // Виводить повідомлення про успішну аутентифікацію Вхід дозволено з роллю гостя, і повертає true.
-      console.log("Вхід дозволено з роллю гостя")
-      return true
+      console.log("Вхід дозволено з роллю гостя");
+      return true;
     } else {
       // Якщо роль не відповідає, запит на аутентифікацію передається наступному обробнику в ланцюгу.
-      return this.nextProcessor.validate(username, passkey, user);
+      return super.validate(username, passkey);
     }
   }
 }
@@ -63,13 +69,13 @@ class CredentialsProcessor extends AuthProcessor {
   //validate Метод для перевірки аутентифікації. Перевіряє облікові дані користувача.
   validate(username, passkey) {
     // Якщо облікові дані вірні, username=admin, та passkey=admin123, аутентифікація успішна.
-    if (username === 'admin' && passkey === 'admin123') {
+    if (username === "admin" && passkey === "admin123") {
       // Виводить повідомлення про успішну аутентифікацію Вхід дозволено за обліковими даними, і повертає true.
-      console.log("Вхід дозволено за обліковими даними")
-      return true
+      console.log("Вхід дозволено за обліковими даними");
+      return true;
     } else {
       // Якщо облікові дані не вірні, запит на аутентифікацію передається наступному обробнику в ланцюгу.
-      return this.nextProcessor.validate(username, passkey);
+      return super.validate(username, passkey);
     }
   }
 }
